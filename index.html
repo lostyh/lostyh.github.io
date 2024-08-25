@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Bluetooth Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            color: white;
+            text-align: center;
+            background: url('fundo.gif') no-repeat center center fixed;
+            background-size: cover;
+            overflow: auto;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('fundo.gif') no-repeat center center fixed;
+			background: rgba(0, 0, 0, 0.5); /* Opacidade preta para uma camada mais escura */
+            filter: blur(20px); /* Ajuste o valor do blur conforme necessário */
+            background-size: cover;
+            z-index: -2;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .panel {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+        #scanButton {
+            background-color: #1E90FF;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        #devicePanel, #connectPanel {
+            display: none;
+            margin-top: 20px;
+        }
+        #devicePanel h2, #connectPanel h2 {
+            margin: 0;
+        }
+        #devicePanel label {
+            font-weight: bold;
+        }
+        .device-item {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .device-item.connected {
+            background-color: #004d00;
+            color: #00ff00;
+        }
+        .device-item.offline {
+            background-color: #333;
+            color: #666;
+        }
+        select, button {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        select:focus, button:focus {
+            outline: none;
+            border-color: #1E90FF;
+        }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div class="panel">
+            <button id="scanButton">Scanear Bluetooth</button>
+			<label id="supportMessage" class="error-message" style="display: none;"></label>
+        </div>
+        <div id="devicePanel" class="panel">
+            <h2>Dispositivos</h2>
+            <label id="deviceCount">[*número de dispositivos encontrados*] Carregando...</label>
+            <div id="deviceList"></div>
+        </div>
+        <div id="connectPanel" class="panel">
+            <h2>Tocar Som</h2>
+            <select id="audioSelect">
+                <option value="">Selecione um áudio</option>
+                <option value="audio1.mp3">Dolinho (estorado)</option>
+                <option value="audio2.mp3">Motorola (estorado)</option>
+            </select>
+            <button id="connectButton">Conectar(s)</button>
+            <label id="error-message" class="error-message"></label>
+        </div>
+        
+    </div>
+
+    <script>
+        document.getElementById('scanButton').addEventListener('click', async () => {
+            const supportMessage = document.getElementById('supportMessage');
+
+           if (!navigator.bluetooth) {
+    const supportMessage = document.getElementById('supportMessage');
+    supportMessage.textContent = 'Você não tem uma placa Bluetooth ou seu Bluetooth não está ligado!';
+
+    // Exibe a mensagem de suporte
+    supportMessage.style.display = 'block';
+
+    // Oculta a mensagem após 2 segundos
+    setTimeout(() => {
+        supportMessage.style.display = 'none';
+    }, 3000);
+
+    return;
+}
+
+            supportMessage.style.display = 'none';
+
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                });
+
+                const deviceList = document.getElementById('deviceList');
+                deviceList.innerHTML = '';
+                const deviceCountLabel = document.getElementById('deviceCount');
+                deviceCountLabel.textContent = `1 Dispositivo encontrado`;
+
+                const deviceItem = document.createElement('div');
+                deviceItem.className = 'device-item connected';
+                deviceItem.textContent = `${device.name} || Conectável`;
+                deviceList.appendChild(deviceItem);
+
+                document.getElementById('devicePanel').style.display = 'block';
+            } catch (error) {
+                console.error('Erro ao encontrar dispositivos Bluetooth:', error);
+                alert('Não foi possível encontrar dispositivos Bluetooth. Verifique as permissões e o suporte do navegador.');
+            }
+        });
+
+        document.getElementById('connectButton').addEventListener('click', () => {
+            const audioSelect = document.getElementById('audioSelect');
+            const selectedAudio = audioSelect.value;
+            const errorMessage = document.getElementById('error-message');
+
+            if (!selectedAudio) {
+                errorMessage.textContent = 'Selecione um som para conectar!';
+                setTimeout(() => {
+                    errorMessage.textContent = '';
+                }, 2000);
+                audioSelect.style.borderColor = 'red';
+                return;
+            }
+
+            audioSelect.style.borderColor = '#ccc';
+
+            const audio = new Audio(selectedAudio);
+            audio.play().then(() => {
+                alert('Som tocado com sucesso kkkkkkk!');
+            }).catch(error => {
+                console.error('Erro ao tocar o som (F):', error);
+            });
+        });
+    </script>
+</body>
+</html>
